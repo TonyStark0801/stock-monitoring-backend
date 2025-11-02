@@ -7,8 +7,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
@@ -48,6 +55,49 @@ public class GlobalExceptionHandler {
             );
 
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<BaseResponse<Object>> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+            log.warn("Validation failed: {}", ex.getMessage());
+
+            Map<String, String> errors = new HashMap<>();
+            ex.getBindingResult().getAllErrors().forEach((error) -> {
+                String fieldName = ((FieldError) error).getField();
+                String errorMessage = error.getDefaultMessage();
+                errors.put(fieldName, errorMessage);
+            });
+
+            BaseResponse<Object> response = BaseResponse.error(
+                    "VALIDATION_ERROR",
+                    "Validation failed: " + errors.toString()
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        @ExceptionHandler(MissingServletRequestParameterException.class)
+        public ResponseEntity<BaseResponse<Object>> handleMissingParameterException(MissingServletRequestParameterException ex, HttpServletRequest request) {
+            log.warn("Missing required parameter: {}", ex.getMessage());
+
+            BaseResponse<Object> response = BaseResponse.error(
+                    "MISSING_PARAMETER",
+                    "Required parameter '" + ex.getParameterName() + "' is missing"
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+        public ResponseEntity<BaseResponse<Object>> handleTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+            log.warn("Type mismatch for parameter: {}", ex.getMessage());
+
+            BaseResponse<Object> response = BaseResponse.error(
+                    "INVALID_PARAMETER_TYPE",
+                    "Invalid value for parameter '" + ex.getName() + "'. Expected " + ex.getRequiredType().getSimpleName()
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
         @ExceptionHandler(Exception.class)
