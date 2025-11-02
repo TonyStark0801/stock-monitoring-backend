@@ -21,95 +21,96 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-        @ExceptionHandler(CustomException.class)
-        public ResponseEntity<BaseResponse<Object>> handleCustomException(CustomException ex, HttpServletRequest request) {
-            log.warn("Custom exception: {} - {}", ex.getErrorType(), ex.getCustomMessage());
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<BaseResponse> handleCustomException(CustomException ex, HttpServletRequest request) {
+        log.warn("Custom exception: {} - {}", ex.getErrorType(), ex.getCustomMessage());
 
-            BaseResponse<Object> response = BaseResponse.error(
-                    ex.getHttpStatus().name(),
-                    ex.getCustomMessage() != null ? ex.getCustomMessage() : "An error occurred"
-            );
+        BaseResponse response = BaseResponse.error(
+                ex.getCustomMessage() != null ? ex.getCustomMessage() : "An error occurred",
+                ex.getHttpStatus().name()
+        );
 
-            return new ResponseEntity<>(response, ex.getHttpStatus());
-        }
-
-        @ExceptionHandler(BadCredentialsException.class)
-        public ResponseEntity<BaseResponse<Object>> handleBadCredentialsException(BadCredentialsException ex, HttpServletRequest request) {
-            log.warn("Authentication failed: {}", ex.getMessage());
-
-            BaseResponse<Object> response = BaseResponse.error(
-                    "AUTHENTICATION_FAILED",
-                    "Invalid username or password"
-            );
-
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        }
-
-        @ExceptionHandler(AuthenticationException.class)
-        public ResponseEntity<BaseResponse<Object>> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
-            log.warn("Authentication exception: {}", ex.getMessage());
-
-            BaseResponse<Object> response = BaseResponse.error(
-                    "AUTHENTICATION_FAILED",
-                    "Authentication failed"
-            );
-
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        }
-
-        @ExceptionHandler(MethodArgumentNotValidException.class)
-        public ResponseEntity<BaseResponse<Object>> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
-            log.warn("Validation failed: {}", ex.getMessage());
-
-            Map<String, String> errors = new HashMap<>();
-            ex.getBindingResult().getAllErrors().forEach((error) -> {
-                String fieldName = ((FieldError) error).getField();
-                String errorMessage = error.getDefaultMessage();
-                errors.put(fieldName, errorMessage);
-            });
-
-            BaseResponse<Object> response = BaseResponse.error(
-                    "VALIDATION_ERROR",
-                    "Validation failed: " + errors.toString()
-            );
-
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
-        @ExceptionHandler(MissingServletRequestParameterException.class)
-        public ResponseEntity<BaseResponse<Object>> handleMissingParameterException(MissingServletRequestParameterException ex, HttpServletRequest request) {
-            log.warn("Missing required parameter: {}", ex.getMessage());
-
-            BaseResponse<Object> response = BaseResponse.error(
-                    "MISSING_PARAMETER",
-                    "Required parameter '" + ex.getParameterName() + "' is missing"
-            );
-
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
-        @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-        public ResponseEntity<BaseResponse<Object>> handleTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
-            log.warn("Type mismatch for parameter: {}", ex.getMessage());
-
-            BaseResponse<Object> response = BaseResponse.error(
-                    "INVALID_PARAMETER_TYPE",
-                    "Invalid value for parameter '" + ex.getName() + "'. Expected " + ex.getRequiredType().getSimpleName()
-            );
-
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
-        @ExceptionHandler(Exception.class)
-        public ResponseEntity<BaseResponse<Object>> handleGenericException(Exception ex, HttpServletRequest request) {
-            // Only unexpected exceptions are logged as ERROR
-            log.error("Unexpected error occurred", ex);
-
-            BaseResponse<Object> response = BaseResponse.error(
-                    "INTERNAL_ERROR",
-                    "An unexpected error occurred"
-            );
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
+        return new ResponseEntity<>(response, ex.getHttpStatus());
     }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<BaseResponse> handleBadCredentialsException(BadCredentialsException ex, HttpServletRequest request) {
+        log.warn("Authentication failed: {}", ex.getMessage());
+
+        BaseResponse response = BaseResponse.error(
+                "Invalid username or password",
+                "AUTHENTICATION_FAILED"
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<BaseResponse> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
+        log.warn("Authentication exception: {}", ex.getMessage());
+
+        BaseResponse response = BaseResponse.error(
+                "Authentication failed",
+                "AUTHENTICATION_FAILED"
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<BaseResponse> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        log.warn("Validation failed: {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        BaseResponse response = BaseResponse.error(
+                "Validation failed",
+                "VALIDATION_ERROR",
+                errors
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<BaseResponse> handleMissingParameterException(MissingServletRequestParameterException ex, HttpServletRequest request) {
+        log.warn("Missing required parameter: {}", ex.getMessage());
+
+        BaseResponse response = BaseResponse.error(
+                "Required parameter '" + ex.getParameterName() + "' is missing",
+                "MISSING_PARAMETER"
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<BaseResponse> handleTypeMismatchException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        log.warn("Type mismatch for parameter: {}", ex.getMessage());
+
+        BaseResponse response = BaseResponse.error(
+                "Invalid value for parameter '" + ex.getName() + "'. Expected " + ex.getRequiredType().getSimpleName(),
+                "INVALID_PARAMETER_TYPE"
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<BaseResponse> handleGenericException(Exception ex, HttpServletRequest request) {
+        // Only unexpected exceptions are logged as ERROR
+        log.error("Unexpected error occurred", ex);
+
+        BaseResponse response = BaseResponse.error(
+                "An unexpected error occurred. Please try again later.",
+                "INTERNAL_ERROR"
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}

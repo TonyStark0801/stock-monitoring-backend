@@ -6,7 +6,7 @@ spring:
     name: profile-service
   
   datasource:
-    url: jdbc:postgresql://localhost:5433/profile_db
+    url: jdbc:postgresql://localhost:5432/stock_monitoring
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -19,6 +19,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+        default_schema: profile
 
 management:
   endpoints:

@@ -1,4 +1,3 @@
-
 services:
   # Database (shared)
   postgres:
@@ -12,6 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - stock_postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-schemas.sql:/docker-entrypoint-initdb.d/init-schemas.sql
     networks:
       - stock-network
 
@@ -23,6 +23,18 @@ services:
       - "6379:6379"
     networks:
       - stock-network
+
+  zookeeper:
+    image: zookeeper:3.8.3
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/data
+      - zookeeper-logs:/datalog
 
   # API Gateway
   api-gateway:
@@ -48,10 +60,13 @@ services:
       - "8081:8081"
     depends_on:
       - postgres
+      - redis
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/stock_monitoring
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
     networks:
@@ -93,6 +108,8 @@ services:
 
 volumes:
   stock_postgres_data:
+  zookeeper-data:
+  zookeeper-logs:
 
 networks:
   stock-network:

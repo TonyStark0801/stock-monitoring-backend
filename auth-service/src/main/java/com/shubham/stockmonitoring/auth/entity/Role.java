@@ -1,12 +1,9 @@
 package com.shubham.stockmonitoring.auth.entity;
 
 import lombok.Getter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public enum Role {
     USER(Collections.emptySet()),
@@ -34,11 +31,4 @@ public enum Role {
         this.permissions = permissions;
     }
 
-    public Set<GrantedAuthority> getAuthorities() {
-        Set<GrantedAuthority> authorities = permissions.stream()
-                .map(p -> new SimpleGrantedAuthority(p.getPermission()))
-                .collect(Collectors.toSet());
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
-        return authorities;
-    }
 }

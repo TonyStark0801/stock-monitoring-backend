@@ -1,79 +1,70 @@
 package com.shubham.stockmonitoring.auth.entity;
 
+import com.shubham.stockmonitoring.auth.dto.request.RegisterRequest;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Set;
+import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "auth")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails {
+@Builder
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
+    private String userId = UUID.randomUUID().toString();
 
     @Column(unique = true, nullable = false)
-    private String username;
-    
+    private String name;
+
     @Column(unique = true, nullable = false)
     private String email;
 
     @Column(nullable = false)
     private String password;
-    
+
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
-    
+
     private boolean enabled = true;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
-    
+
+
+    public User(String name, String email, String password, boolean enabled) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.userId = UUID.randomUUID().toString();
+        this.enabled = enabled;
+    }
+
+    public User(RegisterRequest request,  String password, boolean enabled) {
+        this.name = request.getName();
+        this.email = request.getEmail();
+        this.password = password;
+        this.userId = UUID.randomUUID().toString();
+        this.enabled = enabled;
+    }
+
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-    }
-    
-    // UserDetails implementation
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.getAuthorities();
-    }
-    
-    @Override
-    public boolean isAccountNonExpired() { return true; }
-    
-    @Override
-    public boolean isAccountNonLocked() { return true; }
-    
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
-    
-    @Override
-    public boolean isEnabled() { return enabled; }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
     }
 
 }

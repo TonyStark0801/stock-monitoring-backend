@@ -1,4 +1,4 @@
-package com.shubham.stockmonitoring.commons;
+package com.shubham.stockmonitoring.commons.config;
 
 import com.shubham.stockmonitoring.commons.util.RedisService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

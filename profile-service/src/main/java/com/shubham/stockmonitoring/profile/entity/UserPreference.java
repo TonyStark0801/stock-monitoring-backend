@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_preferences")
+@Table(name = "user_preferences", schema = "profile")
 @Data
 public class UserPreference {
     @Id

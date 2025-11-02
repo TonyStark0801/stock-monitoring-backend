@@ -31,7 +31,7 @@ public class AppConfig {
         corsConfig.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", corsConfig);
+        source.registerCorsConfiguration("/v1/api/**", corsConfig);
 
         return new CorsWebFilter(source);
     }
