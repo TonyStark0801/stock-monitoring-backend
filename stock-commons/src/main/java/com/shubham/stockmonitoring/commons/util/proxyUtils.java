@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 @Component
 public class proxyUtils {
 
-    public final ValidationUtils validationUtils;
+    public final ObjectUtil validationUtils;
 
-    public proxyUtils(ValidationUtils validationUtils) {
+    public proxyUtils(ObjectUtil validationUtils) {
         this.validationUtils = validationUtils;
     }
 
@@ -21,7 +21,7 @@ public class proxyUtils {
         String identifier = Arrays.stream(identifierParts)
                 .filter(part -> !validationUtils.isNullOrEmpty(part))
                 .collect(Collectors.joining("_"));
-        return prefix + ":" + identifier;
+        return prefix + "_" + identifier;
     }
 
 }

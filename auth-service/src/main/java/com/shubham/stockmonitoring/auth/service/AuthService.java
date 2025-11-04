@@ -2,13 +2,16 @@ package com.shubham.stockmonitoring.auth.service;
 
 import com.shubham.stockmonitoring.auth.dto.request.LoginRequest;
 import com.shubham.stockmonitoring.auth.dto.request.RegisterRequest;
+import com.shubham.stockmonitoring.auth.dto.request.ValidateOtpRequest;
 import com.shubham.stockmonitoring.auth.dto.response.AuthResponse;
-import com.shubham.stockmonitoring.auth.dto.response.RegisterResponse;
+import com.shubham.stockmonitoring.auth.dto.response.GenerateOtpResponse;
 import com.shubham.stockmonitoring.auth.entity.User;
 import com.shubham.stockmonitoring.auth.repository.UserRepository;
 import com.shubham.stockmonitoring.commons.dto.BaseResponse;
 import com.shubham.stockmonitoring.commons.exception.CustomException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.shubham.stockmonitoring.auth.Util.Constants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,41 +39,49 @@ public class AuthService {
             throw new CustomException("USER_EXISTS", "Username already exists", HttpStatus.BAD_REQUEST);
         }
 
-        String transactionId = otpService.generateAndSendOtp(request.getEmail());
-        userRepository.save(
-                User.builder()
-                        .userId(UUID.randomUUID().toString())
-                        .name(request.getName())
-                        .email(request.getEmail())
-                        .password(passwordEncoder.encode(request.getPassword()))
-                        .enabled(false)
-                        .build()
-        );
+        User newUser = User.builder()
+                .userId(UUID.randomUUID().toString())
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .enabled(false)
+                .build();
+        userRepository.save(newUser);
 
-        RegisterResponse registerResponse = RegisterResponse.builder()
-                .transactionId(transactionId)
-                .message("OTP sent to email for verification")
+        AuthResponse registerResponse = AuthResponse.builder()
+                .name(newUser.getName())
+                .email(newUser.getEmail())
+                .token(jwtService.generateToken(newUser))
+                .tokenType("Bearer")
+                .isEnabled(newUser.isEnabled())
+                .message(REGISTER_SUCCESS_MESSAGE)
                 .build();
 
         return BaseResponse.success(registerResponse);
 
     }
 
-    public AuthResponse verifyEmailAndLogin(String email, String otp) {
-        if (!otpService.validateOtp(email, otp)) {
+    public BaseResponse verifyEmailAndLogin(ValidateOtpRequest request) {
+        if (!otpService.validateOtp(request)) {
             throw new CustomException("INVALID_OTP", "Invalid or expired OTP", HttpStatus.BAD_REQUEST);
         }
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException("USER_NOT_FOUND", "User not found", HttpStatus.BAD_REQUEST));
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new CustomException("USER_NOT_FOUND", "User not found", HttpStatus.BAD_REQUEST));
 
-        // Enable user after email verification
         user.setEnabled(true);
         userRepository.save(user);
 
-        // Generate JWT token
-        String token = jwtService.generateToken(user);
+        AuthResponse loginResponse =  AuthResponse.builder()
+                .name(user.getName())
+                .email(user.getEmail())
+                .userId(user.getUserId())
+                .token(jwtService.generateToken(user))
+                .tokenType("Bearer")
+                .isEnabled(user.isEnabled())
+                .message(OTP_VERIFIED_MESSAGE)
+                .build();
 
-        return new AuthResponse(token, "Bearer", user.getUserId(), user.getName(), user.getEmail(), user.getRole().name());
+        return BaseResponse.success(loginResponse);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -88,7 +101,7 @@ public class AuthService {
         // Generate JWT token
         String token = jwtService.generateToken(user);
 
-        return new AuthResponse(token, "Bearer", user.getUserId(), user.getName(), user.getEmail(), user.getRole().name());
+        return null ;//new AuthResponse(token, "Bearer", user.getUserId(), user.getName(), user.getEmail(), user.getRole().name());
     }
 
     public String validateToken(String token) {
@@ -105,4 +118,17 @@ public class AuthService {
 
         return user.getId().toString();
     }
+
+    public BaseResponse generateOtp(@Valid @NotBlank(message = "Email is required") String email) {
+        String transactionId = otpService.generateAndSendOtp(email);
+        return BaseResponse.success(
+                GenerateOtpResponse.builder()
+                        .email(email)
+                        .transactionId(transactionId)
+                        .message(OTP_SENT_MESSAGE)
+                        .build()
+        );
+    }
+
+
 }

@@ -7,12 +7,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class ValidationUtils {
+public class ObjectUtil {
 
     /**
      * Check if String is null or empty
      */
-    public boolean isNullOrEmpty(String str) {
+    public static boolean isNullOrEmpty(String str) {
         return str == null || str.trim().isEmpty();
     }
 

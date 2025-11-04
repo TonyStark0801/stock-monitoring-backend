@@ -1,16 +1,11 @@
 package com.shubham.stockmonitoring.auth.controller;
 
-import com.shubham.stockmonitoring.auth.dto.response.AuthResponse;
-import com.shubham.stockmonitoring.auth.dto.request.LoginRequest;
 import com.shubham.stockmonitoring.auth.dto.request.RegisterRequest;
+import com.shubham.stockmonitoring.auth.dto.request.ValidateOtpRequest;
 import com.shubham.stockmonitoring.auth.service.AuthService;
 import com.shubham.stockmonitoring.commons.dto.BaseResponse;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,6 +20,17 @@ public class AuthController {
     @PostMapping("/register")
     public BaseResponse register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
+    }
+
+   @PostMapping("/generateOtp")
+   public BaseResponse generateOtp(@Valid @RequestHeader("X-CLIENT-EMAIL") String email) {
+       return authService.generateOtp(email);
+   }
+
+    @PostMapping("/validateOtp")
+    public BaseResponse validateOtp(@RequestBody ValidateOtpRequest request, @RequestHeader("X-CLIENT-EMAIL") String email) {
+        request.setEmail(email);
+        return authService.verifyEmailAndLogin(request);
     }
     
 //    @PostMapping("/login")

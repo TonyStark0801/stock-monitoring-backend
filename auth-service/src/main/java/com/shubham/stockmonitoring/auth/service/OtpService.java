@@ -1,16 +1,14 @@
 package com.shubham.stockmonitoring.auth.service;
 
+import com.shubham.stockmonitoring.auth.dto.request.ValidateOtpRequest;
+import com.shubham.stockmonitoring.commons.util.ObjectUtil;
 import com.shubham.stockmonitoring.commons.util.RedisService;
 import com.shubham.stockmonitoring.commons.util.proxyUtils;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.time.Duration;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static com.shubham.stockmonitoring.auth.Util.Constants.OTP_REDIS_EXPIRY;
 
@@ -25,12 +23,12 @@ public class OtpService {
 
 
     public String generateAndSendOtp(String email) {
-        String otp  = String.valueOf(100000 + secureRandom.nextInt(900000));
+        String otp = String.valueOf(100000 + secureRandom.nextInt(900000));
         String transactionId = UUID.randomUUID().toString();
 
         String key = proxyUtils.generateRedisKey("OTP", email, transactionId);
         redisService.set(key, otp, OTP_REDIS_EXPIRY);
-        emailService.sendOtpVerificationEmail(email, otp);
+//        emailService.sendOtpVerificationEmail(email, otp);
         return transactionId;
     }
 
@@ -44,15 +42,13 @@ public class OtpService {
         redisService.set(key, otp, OTP_REDIS_EXPIRY);
     }
 
-    public boolean validateOtp(String email, String otp) {
-        String key = "otp:" + email;
+    public boolean validateOtp(ValidateOtpRequest request) {
+        String key = proxyUtils.generateRedisKey("OTP", request.getEmail(), request.getTransactionId());
         String storedOtp = redisService.get(key);
 
-        if (storedOtp == null) {
-            return false; // OTP expired or doesn't exist
-        }
+        if (ObjectUtil.isNullOrEmpty(storedOtp)) return false;
 
-        boolean isValid = storedOtp.equals(otp);
+        boolean isValid = storedOtp.equals(request.getOtp());
         if (isValid) {
             redisService.delete(key);
         }
@@ -60,8 +56,4 @@ public class OtpService {
         return isValid;
     }
 
-    public void invalidateOtp(String email) {
-        String key = "otp:" + email;
-        redisService.delete(key);
-    }
 }

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.validation.FieldError;
@@ -96,6 +97,18 @@ public class GlobalExceptionHandler {
         BaseResponse response = BaseResponse.error(
                 "Invalid value for parameter '" + ex.getName() + "'. Expected " + ex.getRequiredType().getSimpleName(),
                 "INVALID_PARAMETER_TYPE"
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<BaseResponse> handleMissingHeaderException(MissingRequestHeaderException ex, HttpServletRequest request) {
+        log.warn("Missing required header: {}", ex.getMessage());
+
+        BaseResponse response = BaseResponse.error(
+                "Required header '" + ex.getHeaderName() + "' is missing",
+                "MISSING_HEADER"
         );
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);

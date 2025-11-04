@@ -22,7 +22,6 @@ public class User {
     @Column(unique = true, nullable = false)
     private String userId = UUID.randomUUID().toString();
 
-    @Column(unique = true, nullable = false)
     private String name;
 
     @Column(unique = true, nullable = false)
@@ -31,8 +30,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Role role = Role.USER;
 
     private boolean enabled = true;
     private LocalDateTime createdAt;
