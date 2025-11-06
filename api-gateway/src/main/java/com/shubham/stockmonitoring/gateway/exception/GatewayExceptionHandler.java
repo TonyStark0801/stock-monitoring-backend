@@ -17,33 +17,29 @@ import org.springframework.web.server.ServerWebExchange;
 public class GatewayExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<BaseResponse<Object>> handleGenericException(
+    public BaseResponse handleGenericException(
             Exception ex, 
             ServerWebExchange exchange) {
         
         log.error("Unexpected error occurred in API Gateway", ex);
 
-        BaseResponse<Object> response = BaseResponse.error(
+        return BaseResponse.error(
                 "GATEWAY_ERROR",
                 "An error occurred while processing your request"
         );
-        
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<BaseResponse<Object>> handleRuntimeException(
+    public BaseResponse handleRuntimeException(
             RuntimeException ex, 
             ServerWebExchange exchange) {
         
         log.warn("Runtime exception in API Gateway: {}", ex.getMessage());
 
-        BaseResponse<Object> response = BaseResponse.error(
+        return BaseResponse.error(
                 "GATEWAY_ERROR",
                 ex.getMessage() != null ? ex.getMessage() : "An error occurred"
         );
-        
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
 

@@ -20,7 +20,7 @@ public class GatewayController  {
     }
 
     @GetMapping("/health")
-    public BaseResponse<List<Healthcheckdto>> healthCheck(){
+    public BaseResponse healthCheck(){
         return healthCheckService.healthCheck();
     }
 

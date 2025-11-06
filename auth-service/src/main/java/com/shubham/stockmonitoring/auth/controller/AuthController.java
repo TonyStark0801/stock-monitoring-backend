@@ -1,5 +1,6 @@
 package com.shubham.stockmonitoring.auth.controller;
 
+import com.shubham.stockmonitoring.auth.dto.request.LoginRequest;
 import com.shubham.stockmonitoring.auth.dto.request.RegisterRequest;
 import com.shubham.stockmonitoring.auth.dto.request.ValidateOtpRequest;
 import com.shubham.stockmonitoring.auth.service.AuthService;
@@ -33,11 +34,10 @@ public class AuthController {
         return authService.verifyEmailAndLogin(request);
     }
     
-//    @PostMapping("/login")
-//    public ResponseEntity<BaseResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
-//        AuthResponse response = authService.login(request);
-//        return ResponseEntity.ok(BaseResponse.success("Login successful", response));
-//    }
+    @PostMapping("/login")
+    public BaseResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
+    }
 //
 //    @PostMapping("/verify-email")
 //    public ResponseEntity<BaseResponse<AuthResponse>> verifyEmail(@RequestBody Map<String, String> request) {

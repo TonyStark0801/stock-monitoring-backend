@@ -21,7 +21,7 @@ public class HealthCheckService {
 
     }
 
-    public BaseResponse<List<Healthcheckdto>> healthCheck() {
+    public BaseResponse healthCheck() {
         List<Healthcheckdto> services =  new ArrayList<>();
 
         routeLocator.getRoutes().subscribe(route -> {

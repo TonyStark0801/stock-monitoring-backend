@@ -5,6 +5,7 @@ import com.shubham.stockmonitoring.commons.util.ObjectUtil;
 import com.shubham.stockmonitoring.commons.util.RedisService;
 import com.shubham.stockmonitoring.commons.util.proxyUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -21,10 +22,9 @@ public class OtpService {
     private final RedisService redisService;
     private final EmailService emailService;
 
-
     public String generateAndSendOtp(String email) {
-        String otp = String.valueOf(100000 + secureRandom.nextInt(900000));
-        String transactionId = UUID.randomUUID().toString();
+        String otp = "123456"; //String.valueOf(100000 + secureRandom.nextInt(900000));
+        String transactionId = "track";//UUID.randomUUID().toString();
 
         String key = proxyUtils.generateRedisKey("OTP", email, transactionId);
         redisService.set(key, otp, OTP_REDIS_EXPIRY);

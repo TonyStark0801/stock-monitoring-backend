@@ -84,24 +84,25 @@ public class AuthService {
         return BaseResponse.success(loginResponse);
     }
 
-    public AuthResponse login(LoginRequest request) {
-        // Get user details
+    public BaseResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new CustomException("USER_NOT_FOUND", "User not found", HttpStatus.BAD_REQUEST));
-
-        // Check if user is enabled
-        if (!user.isEnabled()) {
-            throw new CustomException("USER_NOT_ENABLED", "User account is not enabled. Please verify your email first.", HttpStatus.BAD_REQUEST);
-        }
-
         // Verify password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException("INVALID_CREDENTIALS", "Invalid username or password", HttpStatus.BAD_REQUEST);
         }
 
-        // Generate JWT token
-        String token = jwtService.generateToken(user);
 
-        return null ;//new AuthResponse(token, "Bearer", user.getUserId(), user.getName(), user.getEmail(), user.getRole().name());
+        AuthResponse loginResponse =  AuthResponse.builder()
+                .name(user.getName())
+                .email(user.getEmail())
+                .userId(user.getUserId())
+                .token(jwtService.generateToken(user))
+                .tokenType("Bearer")
+                .isEnabled(user.isEnabled())
+                .message(OTP_VERIFIED_MESSAGE)
+                .build();
+
+        return BaseResponse.success(loginResponse);
     }
 
     public String validateToken(String token) {
