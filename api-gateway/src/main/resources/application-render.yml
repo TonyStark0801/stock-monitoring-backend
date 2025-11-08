@@ -1,0 +1,48 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://${AUTH_SERVICE_URL:auth-service.onrender.com}:${AUTH_SERVICE_PORT:8081}
+          predicates:
+            - Path=/v1/api/auth/**
+          filters:
+            - StripPrefix=0
+
+        - id: profile-service
+          uri: http://${PROFILE_SERVICE_URL:profile-service.onrender.com}:${PROFILE_SERVICE_PORT:8082}
+          predicates:
+            - Path=/v1/api/profile/**
+          filters:
+            - StripPrefix=0
+            - AddRequestHeader=X-Service, profile
+
+        - id: master-data-service
+          uri: http://${MASTER_DATA_SERVICE_URL:master-data-service.onrender.com}:${MASTER_DATA_SERVICE_PORT:8083}
+          predicates:
+            - Path=/v1/api/stocks/**
+            - Path=/v1/api/exchanges/**
+            - Path=/v1/api/sectors/**
+          filters:
+            - StripPrefix=0
+            - AddRequestHeader=X-Service, master-data
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2s
+
+jwt:
+  secret: ${JWT_SECRET}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: INFO
+    com.shubham.stockmonitoring.gateway: INFO
+    org.springframework.web: WARN
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"
+

@@ -99,7 +99,7 @@ public class AuthService {
                 .token(jwtService.generateToken(user))
                 .tokenType("Bearer")
                 .isEnabled(user.isEnabled())
-                .message(OTP_VERIFIED_MESSAGE)
+                .message(LOGIN_SUCCESS_MESSAGE)
                 .build();
 
         return BaseResponse.success(loginResponse);

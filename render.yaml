@@ -1,0 +1,170 @@
+services:
+  # PostgreSQL Database
+  - type: pgsql
+    name: stock-monitoring-db
+    plan: free
+    databaseName: stock_monitoring
+    user: postgres
+
+  # Redis Instance
+  - type: redis
+    name: stock-monitoring-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+
+  # API Gateway (Public Service)
+  - type: web
+    name: api-gateway
+    env: java
+    plan: free
+    buildCommand: cd api-gateway && mvn clean package -DskipTests
+    startCommand: java -jar api-gateway/target/api-gateway-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: SPRING_OUTPUT_ANSI_ENABLED
+        value: ALWAYS
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: stock-monitoring-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: stock-monitoring-redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          type: redis
+          name: stock-monitoring-redis
+          property: password
+      - key: JWT_SECRET
+        sync: false
+      - key: AUTH_SERVICE_URL
+        value: auth-service.onrender.com
+      - key: AUTH_SERVICE_PORT
+        value: 8081
+      - key: PROFILE_SERVICE_URL
+        value: profile-service.onrender.com
+      - key: PROFILE_SERVICE_PORT
+        value: 8082
+      - key: MASTER_DATA_SERVICE_URL
+        value: master-data-service.onrender.com
+      - key: MASTER_DATA_SERVICE_PORT
+        value: 8083
+
+  # Auth Service (Private Service)
+  - type: web
+    name: auth-service
+    env: java
+    plan: free
+    isPrivate: true
+    buildCommand: cd auth-service && mvn clean package -DskipTests
+    startCommand: java -jar auth-service/target/auth-service-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: SPRING_OUTPUT_ANSI_ENABLED
+        value: ALWAYS
+      - key: SPRING_DATASOURCE_URL
+        fromService:
+          type: pgsql
+          name: stock-monitoring-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromService:
+          type: pgsql
+          name: stock-monitoring-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromService:
+          type: pgsql
+          name: stock-monitoring-db
+          property: password
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: stock-monitoring-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: stock-monitoring-redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          type: redis
+          name: stock-monitoring-redis
+          property: password
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRATION
+        value: 86400000
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+
+  # Profile Service (Private Service)
+  - type: web
+    name: profile-service
+    env: java
+    plan: free
+    isPrivate: true
+    buildCommand: cd profile-service && mvn clean package -DskipTests
+    startCommand: java -jar profile-service/target/profile-service-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: SPRING_OUTPUT_ANSI_ENABLED
+        value: ALWAYS
+      - key: SPRING_DATASOURCE_URL
+        fromService:
+          type: pgsql
+          name: stock-monitoring-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromService:
+          type: pgsql
+          name: stock-monitoring-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromService:
+          type: pgsql
+          name: stock-monitoring-db
+          property: password
+
+  # Master Data Service (Private Service)
+  - type: web
+    name: master-data-service
+    env: java
+    plan: free
+    isPrivate: true
+    buildCommand: cd master-data-service && mvn clean package -DskipTests
+    startCommand: java -jar master-data-service/target/master-data-service-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: SPRING_OUTPUT_ANSI_ENABLED
+        value: ALWAYS
+      - key: SPRING_DATASOURCE_URL
+        fromService:
+          type: pgsql
+          name: stock-monitoring-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromService:
+          type: pgsql
+          name: stock-monitoring-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromService:
+          type: pgsql
+          name: stock-monitoring-db
+          property: password
+
