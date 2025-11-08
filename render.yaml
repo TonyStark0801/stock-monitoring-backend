@@ -12,6 +12,34 @@ services:
     plan: free
     maxmemoryPolicy: allkeys-lru
 
+  # Config Server (Private Service)
+  - type: web
+    name: config-server
+    env: java
+    plan: free
+    isPrivate: true
+    buildCommand: cd config-server && mvn clean package -DskipTests
+    startCommand: java -jar config-server/target/config-server-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: CONFIG_REPO_URL
+        sync: false
+      - key: GIT_USERNAME
+        sync: false
+      - key: GIT_PASSWORD
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
+      - key: AUTH_SERVICE_URL
+        value: http://auth-service.onrender.com
+      - key: PROFILE_SERVICE_URL
+        value: http://profile-service.onrender.com
+      - key: MASTER_DATA_SERVICE_URL
+        value: http://master-data-service.onrender.com
+      - key: API_GATEWAY_URL
+        value: http://api-gateway.onrender.com
+
   # API Gateway (Public Service)
   - type: web
     name: api-gateway
@@ -53,6 +81,8 @@ services:
         value: master-data-service.onrender.com
       - key: MASTER_DATA_SERVICE_PORT
         value: 8083
+      - key: CONFIG_SERVER_URL
+        value: config-server.onrender.com
 
   # Auth Service (Private Service)
   - type: web
@@ -109,6 +139,8 @@ services:
         sync: false
       - key: MAIL_PASSWORD
         sync: false
+      - key: CONFIG_SERVER_URL
+        value: config-server.onrender.com
 
   # Profile Service (Private Service)
   - type: web
@@ -138,6 +170,8 @@ services:
           type: pgsql
           name: stock-monitoring-db
           property: password
+      - key: CONFIG_SERVER_URL
+        value: config-server.onrender.com
 
   # Master Data Service (Private Service)
   - type: web
@@ -167,4 +201,6 @@ services:
           type: pgsql
           name: stock-monitoring-db
           property: password
+      - key: CONFIG_SERVER_URL
+        value: config-server.onrender.com
 

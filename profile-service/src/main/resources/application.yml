@@ -5,10 +5,25 @@ spring:
   application:
     name: profile-service
   
+  # Config Server import (Spring Boot 3.x)
+  config:
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
+  
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_URL:http://localhost:8888}
+      fail-fast: false
+      retry:
+        initial-interval: 1000
+        max-attempts: 6
+        max-interval: 2000
+        multiplier: 1.1
+      profile: ${SPRING_PROFILES_ACTIVE:default}
+  
   datasource:
-    url: jdbc:postgresql://localhost:5432/stock_monitoring
-    username: postgres
-    password: postgres
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/stock_monitoring}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -25,10 +40,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,refresh
   endpoint:
     health:
       show-details: always
+    refresh:
+      enabled: true
 
 logging:
   level:

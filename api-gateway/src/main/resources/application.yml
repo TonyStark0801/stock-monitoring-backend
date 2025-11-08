@@ -5,7 +5,21 @@ spring:
   application:
     name: api-gateway
   
+  # Config Server import (Spring Boot 3.x)
+  config:
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
+  
   cloud:
+    config:
+      uri: ${CONFIG_SERVER_URL:http://localhost:8888}
+      fail-fast: false
+      retry:
+        initial-interval: 1000
+        max-attempts: 6
+        max-interval: 2000
+        multiplier: 1.1
+      profile: ${SPRING_PROFILES_ACTIVE:default}
+    
     gateway:
       globalcors:
         cors-configurations:
@@ -24,19 +38,19 @@ spring:
             max-age: 3600
       routes:
         - id: auth-service
-          uri: http://localhost:8081
+          uri: http://${AUTH_SERVICE_URL:localhost}:${AUTH_SERVICE_PORT:8081}
           predicates:
             - Path=/v1/api/auth/**
 
         - id: profile-service
-          uri: http://localhost:8082
+          uri: http://${PROFILE_SERVICE_URL:localhost}:${PROFILE_SERVICE_PORT:8082}
           predicates:
             - Path=/v1/api/profile/**
           filters:
             - AddRequestHeader=X-Service, profile
 
         - id: master-data-service
-          uri: http://localhost:8083
+          uri: http://${MASTER_DATA_SERVICE_URL:localhost}:${MASTER_DATA_SERVICE_PORT:8083}
           predicates:
             - Path=/v1/api/stocks/**
             - Path=/v1/api/exchanges/**
@@ -47,8 +61,12 @@ spring:
   data:
     redis:
       timeout: 2s
-      port: 6379
-      host: localhost
+      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST:localhost}
+      password: ${REDIS_PASSWORD:}
+
+jwt:
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
 
 management:
   endpoints:

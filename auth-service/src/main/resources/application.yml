@@ -6,11 +6,15 @@ server:
 spring:
   application:
     name: auth-service
-  
+
+  # Config Server import (Spring Boot 3.x)
+  config:
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/stock_monitoring
-    username: postgres
-    password: postgres
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/stock_monitoring}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -25,15 +29,16 @@ spring:
   
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
       timeout: 2s
 
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: anonymousperson6863@gmail.com
-    password: "bvhqgrhbjxtljluu"
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     protocol: smtp
     properties:
       mail.smtp.auth: true
@@ -47,17 +52,27 @@ spring:
 
 
 jwt:
-  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-  expiration: 86400000 # 24 hours
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  expiration: ${JWT_EXPIRATION:86400000}
 
 management:
+  server:
+    port: 8081
+    # Explicitly set management context path to root (ignores server.servlet.context-path)
+    servlet:
+      context-path: /
   endpoints:
     web:
+      base-path: /actuator
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,refresh,env,configprops
   endpoint:
     health:
       show-details: always
+    refresh:
+      enabled: true
+    env:
+      show-values: always
 
 
 

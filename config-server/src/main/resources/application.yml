@@ -8,22 +8,50 @@ spring:
     config:
       server:
         git:
-          uri: ${CONFIG_REPO_URL:https://github.com/yourusername/stock-monitoring-configs.git}
+          uri: ${CONFIG_REPO_URL}
           default-label: main
           clone-on-start: true
           force-pull: true
           timeout: 10
+          skip-ssl-validation: false
+          search-paths: '{application}'
+          username: ${GIT_USERNAME:}
+          password: ${GIT_PASSWORD:}
+          # For private repos, use Personal Access Token (PAT) as password
+        native:
+          search-locations: classpath:/config-repo
+
+# Webhook configuration for automatic refresh
+webhook:
+  secret: ${WEBHOOK_SECRET:}  # Optional: GitHub webhook secret for verification
+
+# Service URLs for webhook refresh (used when GitHub webhook is triggered)
+services:
+  auth-service:
+    url: ${AUTH_SERVICE_URL:http://localhost:8081}
+  profile-service:
+    url: ${PROFILE_SERVICE_URL:http://localhost:8082}
+  master-data-service:
+    url: ${MASTER_DATA_SERVICE_URL:http://localhost:8083}
+  api-gateway:
+    url: ${API_GATEWAY_URL:http://localhost:8080}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,refresh
+        include: health,info,refresh,env,configprops
   endpoint:
     health:
       show-details: always
+      config:
+        enabled: true  # Health check for Git connection
+  info:
+    git:
+      enabled: true  # Show Git info in /actuator/info
 
 logging:
   level:
     root: INFO
-    org.springframework.cloud.config: DEBUG
+    org.springframework.cloud.config: INFO
+    org.springframework.cloud.config.server: DEBUG

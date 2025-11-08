@@ -43,3 +43,5 @@ build/
 **/application-local.yml
 **/application-secrets.yml
 **/secrets/
+
+/config-server/src/main/resources/confg-repo/

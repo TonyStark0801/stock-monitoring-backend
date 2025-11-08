@@ -8,3 +8,38 @@ spring:
           clone-on-start: true
           force-pull: true
           timeout: 10
+          skip-ssl-validation: false
+          search-paths: '{application}'
+          username: ${GIT_USERNAME:}
+          password: ${GIT_PASSWORD:}
+          # For private repos, use Personal Access Token (PAT) as password
+
+# Webhook configuration for automatic refresh
+webhook:
+  secret: ${WEBHOOK_SECRET:}  # Optional: GitHub webhook secret for verification
+
+# Service URLs for webhook refresh (Render internal URLs)
+services:
+  auth-service:
+    url: ${AUTH_SERVICE_URL:http://auth-service.onrender.com}
+  profile-service:
+    url: ${PROFILE_SERVICE_URL:http://profile-service.onrender.com}
+  master-data-service:
+    url: ${MASTER_DATA_SERVICE_URL:http://master-data-service.onrender.com}
+  api-gateway:
+    url: ${API_GATEWAY_URL:http://api-gateway.onrender.com}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh,env
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.config: INFO
+    org.springframework.cloud.config.server: DEBUG

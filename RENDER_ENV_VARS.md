@@ -6,11 +6,24 @@ This document lists all required environment variables for deploying the Stock M
 
 Environment variables are set in the Render dashboard for each service. Some variables are automatically provided by Render's service linking, while others must be set manually.
 
+## Config Server
+
+### Required
+- `SPRING_PROFILES_ACTIVE=render` - Activates Render-specific configuration profile
+- `CONFIG_REPO_URL` - **REQUIRED** - Full Git repository URL (e.g., `https://github.com/yourusername/stock-monitoring-configs.git`)
+
+### For Private Repositories
+- `GIT_USERNAME` - **REQUIRED** - Your GitHub username
+- `GIT_PASSWORD` - **REQUIRED** - GitHub Personal Access Token (PAT) with `repo` scope
+
+**Note**: For public repositories, `GIT_USERNAME` and `GIT_PASSWORD` can be left empty.
+
 ## Common Variables (All Services)
 
 ### Required
 - `SPRING_PROFILES_ACTIVE=render` - Activates Render-specific configuration profile
 - `SPRING_OUTPUT_ANSI_ENABLED=ALWAYS` - Enables colored console output
+- `CONFIG_SERVER_URL=config-server.onrender.com` - Config Server URL (for services using Config Client)
 
 ## API Gateway
 
@@ -79,7 +92,27 @@ Environment variables are set in the Render dashboard for each service. Some var
    - Plan: Free
    - Note the connection details
 
-### Step 2: Deploy Services
+3. **Create Config Repository** (GitHub)
+   - Create a new repository: `stock-monitoring-configs`
+   - Make it **private** (recommended for production)
+   - Add config files: `auth-service-render.yml`, `profile-service-render.yml`, etc.
+
+4. **Generate GitHub Personal Access Token** (for private repos)
+   - Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Click "Generate new token (classic)"
+   - Name: `render-config-server`
+   - Scopes: Check `repo` (full control of private repositories)
+   - Generate and **copy the token** (you won't see it again!)
+
+### Step 2: Deploy Config Server First
+1. Deploy Config Server service
+2. **Set Environment Variables**:
+   - `SPRING_PROFILES_ACTIVE=render`
+   - `CONFIG_REPO_URL=https://github.com/yourusername/stock-monitoring-configs.git`
+   - `GIT_USERNAME=your-github-username` (for private repos)
+   - `GIT_PASSWORD=ghp_your_personal_access_token` (for private repos)
+
+### Step 3: Deploy Other Services
 For each service (API Gateway, Auth Service, Profile Service, Master Data Service):
 
 1. **Link Services** (in Render dashboard):
@@ -89,6 +122,7 @@ For each service (API Gateway, Auth Service, Profile Service, Master Data Servic
 2. **Set Manual Variables**:
    - `SPRING_PROFILES_ACTIVE=render`
    - `SPRING_OUTPUT_ANSI_ENABLED=ALWAYS`
+   - `CONFIG_SERVER_URL=config-server.onrender.com`
    - `JWT_SECRET=<your-secret-key>` (same for all services)
 
 3. **Service-Specific Variables**:
