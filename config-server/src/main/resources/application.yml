@@ -4,11 +4,13 @@ server:
 spring:
   application:
     name: config-server
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
   cloud:
     config:
       server:
         git:
-          uri: ${CONFIG_REPO_URL}
+          uri: ${CONFIG_REPO_URL:}
           default-label: main
           clone-on-start: true
           force-pull: true
@@ -17,15 +19,13 @@ spring:
           search-paths: '{application}'
           username: ${GIT_USERNAME:}
           password: ${GIT_PASSWORD:}
-          # For private repos, use Personal Access Token (PAT) as password
         native:
           search-locations: classpath:/config-repo
 
 # Webhook configuration for automatic refresh
 webhook:
-  secret: ${WEBHOOK_SECRET:}  # Optional: GitHub webhook secret for verification
+  secret: ${WEBHOOK_SECRET:}
 
-# Service URLs for webhook refresh (used when GitHub webhook is triggered)
 services:
   auth-service:
     url: ${AUTH_SERVICE_URL:http://localhost:8081}
@@ -45,10 +45,10 @@ management:
     health:
       show-details: always
       config:
-        enabled: true  # Health check for Git connection
+        enabled: true
   info:
     git:
-      enabled: true  # Show Git info in /actuator/info
+      enabled: true
 
 logging:
   level:
