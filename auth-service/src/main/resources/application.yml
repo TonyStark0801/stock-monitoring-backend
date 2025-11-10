@@ -3,6 +3,15 @@ server:
   servlet:
     context-path: /v1/api
 
+
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  oauth:
+      success-redirect: ${OAUTH_SUCCESS_REDIRECT:http://localhost:3000/auth/success}
+      failure-redirect: ${OAUTH_FAILURE_REDIRECT:http://localhost:3000/login?error=oauth_failed}
+
+
 spring:
   application:
     name: auth-service
@@ -47,7 +56,21 @@ spring:
       mail.smtp.timeout: 5000
       mail.smtp.writetimeout: 5000
 
-
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: profile,email
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://www.googleapis.com/oauth2/v4/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
 
 
 
@@ -58,9 +81,7 @@ jwt:
 management:
   server:
     port: 8081
-    # Explicitly set management context path to root (ignores server.servlet.context-path)
-    servlet:
-      context-path: /
+    base-path: /
   endpoints:
     web:
       base-path: /actuator

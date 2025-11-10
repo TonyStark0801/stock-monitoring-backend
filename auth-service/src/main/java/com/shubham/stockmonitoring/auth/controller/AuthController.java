@@ -38,23 +38,15 @@ public class AuthController {
     public BaseResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
-//
-//    @PostMapping("/verify-email")
-//    public ResponseEntity<BaseResponse<AuthResponse>> verifyEmail(@RequestBody Map<String, String> request) {
-//        String email = request.get("email");
-//        String otp = request.get("otp");
-//        AuthResponse response = authService.verifyEmailAndLogin(email, otp);
-//        return ResponseEntity.ok(BaseResponse.success("Email verified successfully", response));
-//    }
-//
-//    @PostMapping("/validate")
-//    public ResponseEntity<BaseResponse<String>> validateToken(@RequestHeader("Authorization") String token) {
-//        String userId = authService.validateToken(token);
-//        return ResponseEntity.ok(BaseResponse.success("Token is valid", userId));
-//    }
-//
-//    @GetMapping("/health")
-//    public ResponseEntity<BaseResponse<String>> health() {
-//        return ResponseEntity.ok(BaseResponse.success("Auth service is healthy", "OK"));
-//    }
+
+    @GetMapping("/oauth2/google")
+    public BaseResponse googleOAuth2Login(@RequestParam("token") String token) {
+        return authService.googleOAuth2Login(token);
+    }
+
+
+    @GetMapping("/health")
+    public BaseResponse health() {
+        return BaseResponse.success("Auth service is healthy");
+    }
 }

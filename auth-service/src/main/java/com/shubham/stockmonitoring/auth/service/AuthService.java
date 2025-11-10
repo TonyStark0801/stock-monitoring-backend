@@ -30,6 +30,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final OtpService otpService;
+    private final GoogleAuthService googleAuthService;
 
 
     @Transactional
@@ -132,4 +133,9 @@ public class AuthService {
     }
 
 
+    public BaseResponse googleOAuth2Login(String token) {
+
+
+        return BaseResponse.success(null);
+    }
 }

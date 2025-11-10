@@ -1,5 +1,6 @@
 package com.shubham.stockmonitoring.auth.entity;
 
+import com.shubham.stockmonitoring.auth.Util.AuthProvider;
 import com.shubham.stockmonitoring.auth.dto.request.RegisterRequest;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,8 +28,15 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
     private String password;
+
+    private String profileImageUrl;
+
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
+
+    @Column(name = "provider_id")
+    private String providerId;
 
 
     private boolean enabled = true;
