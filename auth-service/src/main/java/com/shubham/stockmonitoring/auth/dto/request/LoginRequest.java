@@ -1,5 +1,9 @@
 package com.shubham.stockmonitoring.auth.dto.request;
 
+import com.shubham.stockmonitoring.auth.Util.AuthProvider;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 

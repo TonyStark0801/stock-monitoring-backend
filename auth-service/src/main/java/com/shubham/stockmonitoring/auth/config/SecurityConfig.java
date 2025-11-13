@@ -22,6 +22,7 @@ public class SecurityConfig {
     private final OAuthSuccessHandler oAuthSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService;
+    private final PkceOauth2AuthorizationRequestResolver pkceOauth2AuthorizationRequestResolver;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -29,7 +30,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                                . sessionFixation().migrateSession()  // Important for OAuth2
+                                .sessionFixation().migrateSession()
                                 .maximumSessions(1)
                                 .maxSessionsPreventsLogin(false)
                 )
@@ -40,13 +41,9 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authorization -> authorization
                                 .baseUri("/auth/oauth2/authorization")
-                        )
-                        .redirectionEndpoint(redirection -> redirection
-                                .baseUri("/auth/oauth2/callback/*")
-                        )
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(oAuth2UserService)
-                        )
+                                .authorizationRequestResolver(pkceOauth2AuthorizationRequestResolver))
+                        .redirectionEndpoint(redirection -> redirection.baseUri("/auth/oauth2/callback/*"))
+                        .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService))
                         .successHandler(oAuthSuccessHandler)
                         .failureHandler(oAuth2AuthenticationFailureHandler)
                 );

@@ -87,7 +87,6 @@ public class AuthService {
 
     public BaseResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new CustomException("USER_NOT_FOUND", "User not found", HttpStatus.BAD_REQUEST));
-        // Verify password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException("INVALID_CREDENTIALS", "Invalid username or password", HttpStatus.BAD_REQUEST);
         }
@@ -130,10 +129,5 @@ public class AuthService {
                         .message(OTP_SENT_MESSAGE)
                         .build()
         );
-    }
-
-
-    public BaseResponse googleOAuth2Login(String token) {
-        return BaseResponse.success(null);
     }
 }

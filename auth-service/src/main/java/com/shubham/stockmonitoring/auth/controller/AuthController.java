@@ -1,9 +1,12 @@
 package com.shubham.stockmonitoring.auth.controller;
 
 import com.shubham.stockmonitoring.auth.dto.request.LoginRequest;
+import com.shubham.stockmonitoring.auth.dto.request.OauthExchangeRequest;
 import com.shubham.stockmonitoring.auth.dto.request.RegisterRequest;
 import com.shubham.stockmonitoring.auth.dto.request.ValidateOtpRequest;
+import com.shubham.stockmonitoring.auth.dto.response.OAuthCodeResponse;
 import com.shubham.stockmonitoring.auth.service.AuthService;
+import com.shubham.stockmonitoring.auth.service.OAuthCodeService;
 import com.shubham.stockmonitoring.commons.dto.BaseResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +16,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     
     private final AuthService authService;
+    private final OAuthCodeService oAuthCodeService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, OAuthCodeService oAuthCodeService) {
         this.authService = authService;
+        this.oAuthCodeService = oAuthCodeService;
     }
 
     @PostMapping("/register")
@@ -39,11 +44,12 @@ public class AuthController {
         return authService.login(request);
     }
 
-    @GetMapping("/oauth2/google")
-    public BaseResponse googleOAuth2Login(@RequestParam("token") String token) {
-        return authService.googleOAuth2Login(token);
-    }
 
+    @PostMapping("/oauth/exchange")
+    public BaseResponse exchangeOAuthCode(@RequestBody OauthExchangeRequest request) {
+        OAuthCodeResponse oauthData = oAuthCodeService.exchangeCode(request);
+        return BaseResponse.success(oauthData);
+    }
 
     @GetMapping("/health")
     public BaseResponse health() {
