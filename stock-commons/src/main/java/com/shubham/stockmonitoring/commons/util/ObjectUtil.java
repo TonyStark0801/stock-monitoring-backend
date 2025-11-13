@@ -20,7 +20,7 @@ public class ObjectUtil {
      * Check if Object is null or empty
      * Handles: Collection, Map, Array, String
      */
-    public boolean isNullOrEmpty(Object obj) {
+    public static boolean isNullOrEmpty(Object obj) {
         return switch (obj) {
             case null -> true;
             case String s -> s.trim().isEmpty();

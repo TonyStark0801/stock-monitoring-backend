@@ -134,8 +134,6 @@ public class AuthService {
 
 
     public BaseResponse googleOAuth2Login(String token) {
-
-
         return BaseResponse.success(null);
     }
 }

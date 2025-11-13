@@ -47,29 +47,37 @@ public class GoogleAuthService extends DefaultOAuth2UserService {
         User user;
 
         if (optionalUser.isPresent()) {
-
-            if (!optionalUser.get().getProvider().equals(authProvider)) {
+            user = optionalUser.get();
+            
+            // Check if user is trying to login with different provider
+            if (user.getProvider() != null && !user.getProvider().equals(authProvider)) {
                 throw new CustomException("PROVIDER_MISMATCH",
-                        "Looks like you're signed up with " + optionalUser.get().getProvider() +
-                        " account. Please use your " + optionalUser.get().getProvider() +
+                        "Looks like you're signed up with " + user.getProvider() +
+                        " account. Please use your " + user.getProvider() +
                         " account to login.", HttpStatus.BAD_REQUEST);
             }
 
-            user = optionalUser.get();
+            // Update existing user info
             user.setName(firstName + " " + lastName);
             user.setProfileImageUrl(profileImage);
+            user.setProviderId(providerId);
+            user.setProvider(authProvider);
+            user.setEnabled(true);
+            userRepository.save(user);
+        } else {
+            // Create new user
+            user = User.builder()
+                    .userId(java.util.UUID.randomUUID().toString())
+                    .name(firstName + " " + lastName)
+                    .email(email)
+                    .providerId(providerId)
+                    .provider(authProvider)
+                    .profileImageUrl(profileImage)
+                    .enabled(true)
+                    .build();
             userRepository.save(user);
         }
-        user = User.builder()
-                .userId(java.util.UUID.randomUUID().toString())
-                .name(firstName + " " + lastName)
-                .email(email)
-                .providerId(providerId)
-                .provider(authProvider)
-                .profileImageUrl(profileImage)
-                .enabled(true)
-                .build();
-        userRepository.save(user);
+        
         return oAuth2User;
     }
 

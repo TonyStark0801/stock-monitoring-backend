@@ -22,7 +22,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
             "/v1/api/auth/register",
-            "/v1/api/auth/login"
+            "/v1/api/auth/login",
+            "/v1/api/auth/oauth2/authorization/google",
+            "/v1/api/auth/oauth2/callback/google",
+            "/v1/api/auth/generateOtp",
+            "/v1/api/auth/validateOtp"
     );
 
     @Override
