@@ -24,6 +24,8 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
             HttpServletResponse response,
             AuthenticationException exception) throws IOException {
 
+        log.error("OAuth authentication failed: {}", exception.getMessage());
+        
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUrl)
                 .queryParam("error", exception.getLocalizedMessage())
                 .build().toUriString();

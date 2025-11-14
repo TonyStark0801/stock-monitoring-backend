@@ -9,8 +9,10 @@ import com.shubham.stockmonitoring.auth.service.AuthService;
 import com.shubham.stockmonitoring.auth.service.OAuthCodeService;
 import com.shubham.stockmonitoring.commons.dto.BaseResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -46,8 +48,10 @@ public class AuthController {
 
 
     @PostMapping("/oauth/exchange")
-    public BaseResponse exchangeOAuthCode(@RequestBody OauthExchangeRequest request) {
+    public BaseResponse exchangeOAuthCode(@Valid @RequestBody OauthExchangeRequest request) {
+        log.info("OAuth code exchange endpoint called");
         OAuthCodeResponse oauthData = oAuthCodeService.exchangeCode(request);
+        log.info("OAuth code exchange completed successfully");
         return BaseResponse.success(oauthData);
     }
 

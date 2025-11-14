@@ -3,12 +3,14 @@ package com.shubham.stockmonitoring.auth.config;
 import com.shubham.stockmonitoring.commons.util.ObjectUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PkceOauth2AuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
@@ -33,10 +35,10 @@ public class PkceOauth2AuthorizationRequestResolver implements OAuth2Authorizati
     }
 
     /**
-    * Resolves OAuth2AuthorizationRequest and handles PKCE code_challenge if present.
-    * If code_challenge is valid and uses S256 method, it is stored in the
-    * HTTP session for later verification during token exchange.
-    */
+     * Resolves OAuth2AuthorizationRequest and handles PKCE code_challenge if present.
+     * If code_challenge is valid and uses S256 method, it is stored in the
+     * HTTP session for later verification during token exchange.
+     */
     private OAuth2AuthorizationRequest resolveWithPkce(HttpServletRequest request, String clientRegistrationId) {
         String codeChallenge = request.getParameter("code_challenge");
         String codeChallengeMethod = request.getParameter("code_challenge_method");
@@ -45,9 +47,12 @@ public class PkceOauth2AuthorizationRequestResolver implements OAuth2Authorizati
                 defaultResolver().resolve(request) :
                 defaultResolver().resolve(request, clientRegistrationId);
 
-        if (!ObjectUtil.isNullOrEmpty(authRequest) && !ObjectUtil.isNullOrEmpty(codeChallenge)) {
+        if (authRequest != null && !ObjectUtil.isNullOrEmpty(codeChallenge)) {
             if (PKCE_CODE_CHALLENGE_METHOD_S256.equals(codeChallengeMethod) && isValidCodeChallenge(codeChallenge)) {
                 request.getSession().setAttribute(SESSION_ATTRIBUTE_CODE_CHALLENGE, codeChallenge);
+                log.info("PKCE code_challenge stored in session. Method: {}", codeChallengeMethod);
+            } else {
+                log.warn("Invalid PKCE code_challenge format or method. Method: {}", codeChallengeMethod);
             }
         }
         return authRequest;

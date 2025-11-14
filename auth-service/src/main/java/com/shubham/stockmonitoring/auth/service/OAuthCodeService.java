@@ -85,6 +85,7 @@ public class OAuthCodeService {
 
         String key = proxyUtils.generateRedisKey("OAUTH_CODE", code);
         redisService.set(key, oauthData.toJson(), OAUTH_CODE_EXPIRY);
+        log.info("OAuth code generated successfully. User: {}, Code expires in {} seconds", email, OAUTH_CODE_EXPIRY);
         return code;
     }
 
@@ -107,10 +108,13 @@ public class OAuthCodeService {
             );
         }
 
+        log.info("OAuth code exchange request received");
+
         String key = proxyUtils.generateRedisKey(OAUTH_CODE_REDIS_PREFIX, request.getCode());
         String storedData = redisService.get(key);
 
         if (ObjectUtil.isNullOrEmpty(storedData)) {
+            log.warn("Invalid or expired OAuth code attempted");
             throw new CustomException(
                     "INVALID_OAUTH_CODE",
                     "OAuth code is invalid or has expired",
@@ -123,6 +127,7 @@ public class OAuthCodeService {
 
         if (ObjectUtil.isNullOrEmpty(storedChallenge)) {
             redisService.delete(key);
+            log.error("PKCE code_challenge missing in stored OAuth data");
             throw new CustomException(
                     "PKCE_REQUIRED",
                     "PKCE validation failed: code_challenge not found",
@@ -134,6 +139,7 @@ public class OAuthCodeService {
 
         if (!computedChallenge.equals(storedChallenge)) {
             redisService.delete(key);
+            log.warn("PKCE validation failed: code_verifier does not match challenge");
             throw new CustomException(
                     "INVALID_CODE_VERIFIER",
                     "Code verifier does not match challenge",
@@ -141,6 +147,7 @@ public class OAuthCodeService {
             );
         }
         redisService.delete(key);
+        log.info("OAuth code exchange successful. User: {}", oauthData.getEmail());
         return oauthData;
     }
 
