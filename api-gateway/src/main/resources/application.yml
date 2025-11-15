@@ -5,9 +5,12 @@ spring:
   application:
     name: api-gateway
   
+  # Disable static resource handling and default error pages
+  webflux:
+    static-path-pattern: /nonexistent/**
   # Config Server import (Spring Boot 3.x)
   config:
-    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
+    import: "optional:configserver:${CONFIG_SERVER_URL:localhost:8888}"
   
   cloud:
     config:
@@ -55,17 +58,19 @@ spring:
           uri: http://${MASTER_DATA_SERVICE_URL:localhost}:${MASTER_DATA_SERVICE_PORT:8083}
           predicates:
             - Path=/v1/api/stocks/**
-            - Path=/v1/api/exchanges/**
-            - Path=/v1/api/sectors/**
           filters:
+            - StripPrefix=2
             - AddRequestHeader=X-Service, master-data
 
   data:
     redis:
       timeout: 2s
       port: ${REDIS_PORT:6379}
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:http://localhost}
       password: ${REDIS_PASSWORD:}
+  web:
+    resources:
+      add-mappings: false
 
 jwt:
   secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}

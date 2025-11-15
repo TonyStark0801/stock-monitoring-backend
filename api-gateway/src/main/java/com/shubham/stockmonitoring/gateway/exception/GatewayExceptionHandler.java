@@ -1,7 +1,8 @@
 package com.shubham.stockmonitoring.gateway.exception;
 
 import com.shubham.stockmonitoring.commons.dto.BaseResponse;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,9 +13,9 @@ import org.springframework.web.server.ServerWebExchange;
  * Global exception handler for API Gateway (WebFlux-based)
  * This overrides the stock-commons handler which is servlet-based
  */
-@Slf4j
 @RestControllerAdvice
 public class GatewayExceptionHandler {
+    Logger log = LoggerFactory.getLogger(GatewayExceptionHandler.class);
 
     @ExceptionHandler(Exception.class)
     public BaseResponse handleGenericException(
