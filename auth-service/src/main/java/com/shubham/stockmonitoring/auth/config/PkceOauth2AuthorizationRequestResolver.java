@@ -10,12 +10,12 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
 
+import static com.shubham.stockmonitoring.auth.Util.Constants.*;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class PkceOauth2AuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {
-    private static final String PKCE_CODE_CHALLENGE_METHOD_S256 = "S256";
-    private static final String SESSION_ATTRIBUTE_CODE_CHALLENGE = "oauth_code_challenge";
     private final ClientRegistrationRepository clientRegistrationRepository;
 
     private OAuth2AuthorizationRequestResolver defaultResolver() {
@@ -40,8 +40,8 @@ public class PkceOauth2AuthorizationRequestResolver implements OAuth2Authorizati
      * HTTP session for later verification during token exchange.
      */
     private OAuth2AuthorizationRequest resolveWithPkce(HttpServletRequest request, String clientRegistrationId) {
-        String codeChallenge = request.getParameter("code_challenge");
-        String codeChallengeMethod = request.getParameter("code_challenge_method");
+        String codeChallenge = request.getParameter(PKCE_PARAM_CODE_CHALLENGE);
+        String codeChallengeMethod = request.getParameter(PKCE_PARAM_CODE_CHALLENGE_METHOD);
 
         OAuth2AuthorizationRequest authRequest = ObjectUtil.isNullOrEmpty(clientRegistrationId) ?
                 defaultResolver().resolve(request) :
@@ -50,7 +50,7 @@ public class PkceOauth2AuthorizationRequestResolver implements OAuth2Authorizati
         if (authRequest != null && !ObjectUtil.isNullOrEmpty(codeChallenge)) {
             if (PKCE_CODE_CHALLENGE_METHOD_S256.equals(codeChallengeMethod) && isValidCodeChallenge(codeChallenge)) {
                 request.getSession().setAttribute(SESSION_ATTRIBUTE_CODE_CHALLENGE, codeChallenge);
-                log.info("PKCE code_challenge stored in session. Method: {}", codeChallengeMethod);
+                log.info("PKCE code_challenge stored in session for our own validation. Method: {}", codeChallengeMethod);
             } else {
                 log.warn("Invalid PKCE code_challenge format or method. Method: {}", codeChallengeMethod);
             }

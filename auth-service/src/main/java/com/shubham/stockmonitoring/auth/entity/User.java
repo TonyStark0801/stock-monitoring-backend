@@ -42,6 +42,9 @@ public class User {
     @Column(name = "provider_id", length = 500)
     private String providerId;
 
+    @Column(name = "profile_image", columnDefinition = "BYTEA")
+    private byte[] profileImage;
+
     private boolean enabled = true;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

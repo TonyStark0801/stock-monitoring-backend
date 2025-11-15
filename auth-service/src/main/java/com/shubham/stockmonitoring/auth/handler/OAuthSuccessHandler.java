@@ -17,13 +17,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.Base64;
+
+import static com.shubham.stockmonitoring.auth.Util.Constants.SESSION_ATTRIBUTE_CODE_CHALLENGE;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-
-    private static final String SESSION_ATTRIBUTE_CODE_CHALLENGE = "oauth_code_challenge";
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
@@ -60,12 +61,31 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
             return;
         }
 
+        if(ObjectUtil.isNullOrEmpty(user.getProfileImageUrl())){
+            user.setProfileImageUrl(oAuth2User.getAttribute("picture"));
+            userRepository.save(user);
+        }
+
+        // Determine avatar: prefer base64 data URL from DB if available, else use external URL
+        String avatar = "";
+        if (user.getProfileImage() != null && user.getProfileImage().length > 0) {
+            // User has image stored in DB, convert to base64 data URL
+            String base64Image = Base64.getEncoder().encodeToString(user.getProfileImage());
+            // Default to JPEG, could be enhanced to detect actual content type
+            avatar = "data:image/jpeg;base64," + base64Image;
+            log.debug("Using base64 profile image from DB for user: {}, size: {} bytes", user.getEmail(), user.getProfileImage().length);
+        } else if (!ObjectUtil.isNullOrEmpty(user.getProfileImageUrl())) {
+            // Fallback to external URL if no backend image
+            avatar = user.getProfileImageUrl();
+            log.debug("Using external profile image URL for user: {}", user.getEmail());
+        }
+
         String code = oAuthCodeService.generateCode(
                 token,
                 user.getEmail(),
                 user.getName() != null ? user.getName() : "",
                 user.getUserId(),
-                user.getProfileImageUrl() != null ? user.getProfileImageUrl() : "",
+                avatar,
                 codeChallenge
         );
 

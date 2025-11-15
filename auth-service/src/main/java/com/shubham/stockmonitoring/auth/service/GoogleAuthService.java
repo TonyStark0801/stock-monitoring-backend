@@ -10,7 +10,9 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -18,9 +20,11 @@ import java.util.Optional;
 public class GoogleAuthService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final WebClient webClient;
 
     public GoogleAuthService(UserRepository userRepository) {
         this.userRepository = userRepository;
+        this.webClient = WebClient.builder().build();
     }
 
     @Override
@@ -56,6 +60,29 @@ public class GoogleAuthService extends DefaultOAuth2UserService {
                         " account. Please use your " + user.getProvider() +
                         " account to login.", HttpStatus.BAD_REQUEST);
             }
+
+            if(profileImage!=null){
+                // Fetch and update profile image
+                byte[] image = webClient.get()
+                        .uri(profileImage)
+                        .retrieve()
+                        .bodyToMono(byte[].class)
+                        .block();
+
+                String contentType = String.valueOf(Objects.requireNonNull(webClient.get()
+                                .uri(profileImage)
+                                .retrieve()
+                                .toBodilessEntity()
+                                .block())
+                        .getHeaders()
+                        .getContentType());
+
+                if(image!=null){
+                    user.setProfileImage(image);
+                }
+
+            }
+
 
             // Update existing user info
             user.setName(firstName + " " + lastName);

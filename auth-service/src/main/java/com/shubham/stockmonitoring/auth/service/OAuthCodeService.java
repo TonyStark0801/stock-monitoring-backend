@@ -16,6 +16,8 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+import static com.shubham.stockmonitoring.auth.Util.Constants.*;
+
 /**
  * Production-grade OAuth Code Service with mandatory PKCE validation.
  * SECURITY FEATURES:
@@ -33,9 +35,6 @@ public class OAuthCodeService {
     private final RedisService redisService;
     private final SecureRandom secureRandom;
     private final proxyUtils proxyUtils;
-
-    private static final long OAUTH_CODE_EXPIRY = 5 * 60;
-    private static final String OAUTH_CODE_REDIS_PREFIX = "OAUTH_CODE";
     /**
      * Generates a secure random code and stores OAuth data in Redis with PKCE challenge.
      *
@@ -83,7 +82,7 @@ public class OAuthCodeService {
                 .codeChallenge(codeChallenge)
                 .build();
 
-        String key = proxyUtils.generateRedisKey("OAUTH_CODE", code);
+        String key = proxyUtils.generateRedisKey(OAUTH_CODE_REDIS_PREFIX, code);
         redisService.set(key, oauthData.toJson(), OAUTH_CODE_EXPIRY);
         log.info("OAuth code generated successfully. User: {}, Code expires in {} seconds", email, OAUTH_CODE_EXPIRY);
         return code;
@@ -93,8 +92,7 @@ public class OAuthCodeService {
      * Exchanges an OAuth code for user data and token.
      * MANDATORY PKCE validation using S256 (SHA256).
      *
-     * @param code OAuth code from redirect URL
-     * @param codeVerifier PKCE code verifier (plain text, sent by frontend) - REQUIRED
+     * @param request PKCE code verifier (plain text, sent by frontend) - REQUIRED
      * @return OAuthCodeResponse with token and user data
      * @throws CustomException if code is invalid, expired, or PKCE validation fails
      */
