@@ -49,9 +49,7 @@ public class AuthController {
 
     @PostMapping("/oauth/exchange")
     public BaseResponse exchangeOAuthCode(@Valid @RequestBody OauthExchangeRequest request) {
-        log.info("OAuth code exchange endpoint called");
         OAuthCodeResponse oauthData = oAuthCodeService.exchangeCode(request);
-        log.info("OAuth code exchange completed successfully");
         return BaseResponse.success(oauthData);
     }
 
