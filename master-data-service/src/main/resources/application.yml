@@ -1,9 +1,14 @@
 server:
   port: 8083
 
+
 spring:
   application:
     name: master-data-service
+
+  web:
+    resources:
+      add-mappings: false
   
   # Config Server import (Spring Boot 3.x)
   config:
@@ -29,12 +34,20 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        default_schema: masterdata
+      show-sql: true
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+          format_sql: true
+          default_schema: masterdata
+  
+  # Redis configuration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2s
 
 management:
   endpoints:
@@ -55,3 +68,10 @@ logging:
     org.hibernate: WARN
   pattern:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"
+
+
+finnhub:
+  api:
+    url: ${FINHUB_API_URL:https://finnhub.io/api/v1}
+    token: ${FINHUB_API_TOKEN:d4dikc1r01qmhtc4jnn0d4dikc1r01qmhtc4jnng}
+    # @TODO: Replace with your own token

@@ -59,8 +59,7 @@ public class GatewayErrorWebExceptionHandler implements ErrorWebExceptionHandler
             log.warn("ResponseStatusException: {} - {}", status, errorMessage);
         } else if (ex.getMessage() != null) {
             String message = ex.getMessage();
-            // Check for 404 in various forms
-            if (message.contains("404") || 
+            if (message.contains("404") ||
                 message.contains("NOT_FOUND") || 
                 message.contains("No static resource") ||
                 message.contains("No route found")) {
@@ -74,10 +73,6 @@ public class GatewayErrorWebExceptionHandler implements ErrorWebExceptionHandler
             log.error("Unhandled error in Gateway - Path: {}, Exception: {}", path, ex.getClass().getName(), ex);
         }
 
-        // Ensure status is set
-        if (status == null) {
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
 
         response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);

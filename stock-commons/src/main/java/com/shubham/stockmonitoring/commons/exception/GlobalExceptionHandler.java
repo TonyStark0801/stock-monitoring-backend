@@ -12,6 +12,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @Slf4j
@@ -78,6 +79,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<BaseResponse> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpServletRequest request) {
+        log.warn("No handler found for: {} {}", ex.getHttpMethod(), ex.getRequestURL());
+
+        BaseResponse response = BaseResponse.error(
+                "Endpoint not found: " + ex.getRequestURL(),
+                "NOT_FOUND"
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponse> handleGenericException(Exception ex, HttpServletRequest request) {

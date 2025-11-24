@@ -1,4 +1,4 @@
-package com.shubham.stockmonitoring.masterdata.dto;
+package com.shubham.stockmonitoring.masterdata.dto.respone;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
